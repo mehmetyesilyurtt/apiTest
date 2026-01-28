@@ -1,3 +1,4 @@
+using ApiAnalyzer.Backend.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -51,7 +52,7 @@ namespace apiTest
 
             app.UseRouting();
 
-            app.UserCors();
+            app.UseCors();
 
             app.UseAuthorization();
 

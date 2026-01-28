@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.34301.259
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "apiTest", "apiTest\apiTest.csproj", "{A817015F-2E56-4864-B08B-E7EEABFF840A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "apiTest", "apiTest\apiTest.csproj", "{A817015F-2E56-4864-B08B-E7EEABFF840A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiAnalyzer.Frontend", "ApiAnalyzer.Frontend\ApiAnalyzer.Frontend.csproj", "{C7ADFA6D-99AB-4618-BBDD-38CA75AE8ED1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{A817015F-2E56-4864-B08B-E7EEABFF840A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A817015F-2E56-4864-B08B-E7EEABFF840A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A817015F-2E56-4864-B08B-E7EEABFF840A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7ADFA6D-99AB-4618-BBDD-38CA75AE8ED1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7ADFA6D-99AB-4618-BBDD-38CA75AE8ED1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7ADFA6D-99AB-4618-BBDD-38CA75AE8ED1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7ADFA6D-99AB-4618-BBDD-38CA75AE8ED1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

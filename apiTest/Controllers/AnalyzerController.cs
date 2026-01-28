@@ -10,11 +10,15 @@ namespace ApiAnalyzer.Backend.Controllers
     public class AnalyzeController : ControllerBase
     {
         private readonly AnalyzerService _service;
+
         public AnalyzeController(AnalyzerService service) => _service = service;
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] AnalyzeRequest req)
         {
+            if (string.IsNullOrWhiteSpace(req.Url))
+                return BadRequest(new { error = "URL gerekli" });
+
             var result = await _service.ExecuteAnalysisAsync(req);
             return Ok(result);
         }

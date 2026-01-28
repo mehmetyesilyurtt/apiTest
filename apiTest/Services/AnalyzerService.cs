@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using System.Linq;
+﻿using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ApiAnalyzer.Backend.Models;
@@ -8,37 +8,63 @@ namespace ApiAnalyzer.Backend.Services
 {
     public class AnalyzerService
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
 
-        public AnalyzerService(IHttpClientFactory httpClientFactory)
+        public AnalyzerService(HttpClient httpClient)
         {
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClient;
         }
 
-        public async Task<AnalyzeResponse> ExecuteAnalysisAsync(AnalyzeRequest requestData)
+        public async Task<AnalyzeResponse> ExecuteAnalysisAsync(AnalyzeRequest request)
         {
-            var client = _httpClientFactory.CreateClient();
-            var message = new HttpRequestMessage(new HttpMethod(requestData.Method), requestData.Url);
-
-            if (!string.IsNullOrEmpty(requestData.Body))
-                message.Content = new StringContent(requestData.Body, System.Text.Encoding.UTF8, "application/json");
-
-            if (requestData.Headers != null)
-                foreach (var header in requestData.Headers)
-                    message.Headers.TryAddWithoutValidation(header.Key, header.Value);
-
             var stopwatch = Stopwatch.StartNew();
-            var response = await client.SendAsync(message);
-            stopwatch.Stop();
 
-            return new AnalyzeResponse
+            try
             {
-                StatusCode = (int)response.StatusCode,
-                Content = await response.Content.ReadAsStringAsync(),
-                ElapsedMs = stopwatch.Elapsed.TotalMilliseconds,
-                ContentLength = response.Content.Headers.ContentLength ?? 0,
-                ResponseHeaders = response.Headers.ToDictionary(h => h.Key, h => h.Value.First())
-            };
+                HttpResponseMessage response;
+
+                switch (request.Method.ToUpper())
+                {
+                    case "GET":
+                        response = await _httpClient.GetAsync(request.Url);
+                        break;
+                    case "POST":
+                        response = await _httpClient.PostAsync(request.Url, null);
+                        break;
+                    case "PUT":
+                        response = await _httpClient.PutAsync(request.Url, null);
+                        break;
+                    case "DELETE":
+                        response = await _httpClient.DeleteAsync(request.Url);
+                        break;
+                    default:
+                        throw new ArgumentException("Geçersiz HTTP metodu");
+                }
+
+                stopwatch.Stop();
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                return new AnalyzeResponse
+                {
+                    StatusCode = (int)response.StatusCode,
+                    ElapsedMs = stopwatch.Elapsed.TotalMilliseconds,
+                    ContentLength = content.Length,
+                    Content = content
+                };
+            }
+            catch (Exception ex)
+            {
+                stopwatch.Stop();
+
+                return new AnalyzeResponse
+                {
+                    StatusCode = 0,
+                    ElapsedMs = stopwatch.Elapsed.TotalMilliseconds,
+                    ContentLength = 0,
+                    Content = $"Hata: {ex.Message}"
+                };
+            }
         }
     }
 }
