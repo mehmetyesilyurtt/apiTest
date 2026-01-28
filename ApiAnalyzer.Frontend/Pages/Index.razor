@@ -7,26 +7,75 @@
 <div style="background-color: #121212; color: #e0e0e0; min-height: 100vh; padding: 40px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
     <h1 style="color: #4facfe; margin-bottom: 30px; font-weight: 300;">API Analyzer <span style="font-weight: 700;">Live</span></h1>
 
-    <div style="display: flex; gap: 15px; background: #1e1e1e; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 30px;">
-        <select @bind="method" style="background: #2d2d2d; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; cursor: pointer; outline: none;">
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="DELETE">DELETE</option>
-        </select>
+    <div style="background: #1e1e1e; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 30px;">
+        <!-- URL ve Method Bölümü -->
+        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+            <select @bind="method" style="background: #2d2d2d; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; cursor: pointer; outline: none;">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+            </select>
 
-        <input @bind="url" placeholder="https://api.test.com/endpoint" style="flex: 1; background: #2d2d2d; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; outline: none;" />
+            <input @bind="url" placeholder="https://api.test.com/endpoint" style="flex: 1; background: #2d2d2d; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; outline: none;" />
 
-        <button @onclick="AnalyzeApi" disabled="@isLoading" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: #fff; padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: transform 0.2s; opacity: @(isLoading ? "0.6" : "1");">
-            @if (isLoading)
+            <button @onclick="AnalyzeApi" disabled="@isLoading" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: #fff; padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: transform 0.2s; opacity: @(isLoading ? "0.6" : "1");">
+                @if (isLoading)
+                {
+                    <span>ANALİZ EDİLİYOR...</span>
+                }
+                else
+                {
+                    <span>ANALİZ ET</span>
+                }
+            </button>
+        </div>
+
+        <!-- Headers Bölümü -->
+        <div style="margin-bottom: 15px;">
+            <button @onclick="ToggleHeaders" style="background: #2d2d2d; color: #aaa; border: 1px solid #444; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; margin-bottom: 10px;">
+                🔧 HEADERS @(showHeaders ? "▼" : "▶")
+            </button>
+
+            @if (showHeaders)
             {
-                <span>ANALİZ EDİLİYOR...</span>
+                <div style="background: #0d0d0d; padding: 15px; border-radius: 8px; border: 1px solid #333;">
+                    @foreach (var header in headers)
+                    {
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <input @bind="header.Key" placeholder="Header Key" style="flex: 1; background: #2d2d2d; color: white; border: 1px solid #444; padding: 8px; border-radius: 6px; outline: none; font-size: 12px;" />
+                            <input @bind="header.Value" placeholder="Header Value" style="flex: 1; background: #2d2d2d; color: white; border: 1px solid #444; padding: 8px; border-radius: 6px; outline: none; font-size: 12px;" />
+                            <button @onclick="() => RemoveHeader(header)" style="background: #d32f2f; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">❌</button>
+                        </div>
+                    }
+                    <button @onclick="AddHeader" style="background: #4facfe; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; margin-top: 5px;">+ Header Ekle</button>
+                </div>
             }
-            else
-            {
-                <span>ANALİZ ET</span>
-            }
-        </button>
+        </div>
+
+        <!-- Request Body Bölümü (POST/PUT için) -->
+        @if (method == "POST" || method == "PUT")
+        {
+            <div style="margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <label style="color: #aaa; font-size: 12px; font-weight: bold;">📝 REQUEST BODY</label>
+                    <div style="display: flex; gap: 10px;">
+                        <button @onclick="FormatRequestBody" style="background: #4facfe; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px;">
+                            ✨ Format JSON
+                        </button>
+                        <select @bind="contentType" style="background: #2d2d2d; color: white; border: 1px solid #444; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px;">
+                            <option value="application/json">JSON</option>
+                            <option value="application/xml">XML</option>
+                            <option value="text/plain">Text</option>
+                            <option value="application/x-www-form-urlencoded">Form URL Encoded</option>
+                        </select>
+                    </div>
+                </div>
+                <textarea @bind="requestBody"
+                          placeholder='{"name": "John", "age": 30}'
+                          style="width: 100%; min-height: 150px; background: #0d0d0d; color: #b2ff59; border: 1px solid #333; padding: 15px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 13px; outline: none; resize: vertical;"></textarea>
+            </div>
+        }
     </div>
 
     @if (!string.IsNullOrEmpty(errorMessage))
@@ -136,7 +185,7 @@
 </div>
 
 @code {
-    private string url = "https://jsonplaceholder.typicode.com/posts/1";
+    private string url = "https://jsonplaceholder.typicode.com/posts";
     private string method = "GET";
     private bool isLoading = false;
     private string errorMessage = "";
@@ -145,12 +194,58 @@
     private string generatedModel = "";
     private string selectedLanguage = "";
 
+    // Yeni özellikler
+    private string requestBody = "";
+    private string contentType = "application/json";
+    private bool showHeaders = false;
+    private List<HeaderItem> headers = new List<HeaderItem>();
+
+    private class HeaderItem
+    {
+        public string Key { get; set; } = "";
+        public string Value { get; set; } = "";
+    }
+
     private class ApiResponse
     {
         public int StatusCode { get; set; }
         public double ElapsedMs { get; set; }
         public long ContentLength { get; set; }
         public string Content { get; set; } = "";
+    }
+
+    protected override void OnInitialized()
+    {
+        // Varsayılan header
+        headers.Add(new HeaderItem { Key = "Content-Type", Value = "application/json" });
+    }
+
+    private void ToggleHeaders()
+    {
+        showHeaders = !showHeaders;
+    }
+
+    private void AddHeader()
+    {
+        headers.Add(new HeaderItem());
+    }
+
+    private void RemoveHeader(HeaderItem header)
+    {
+        headers.Remove(header);
+    }
+
+    private void FormatRequestBody()
+    {
+        try
+        {
+            var jsonDoc = JsonDocument.Parse(requestBody);
+            requestBody = JsonSerializer.Serialize(jsonDoc.RootElement, new JsonSerializerOptions { WriteIndented = true });
+        }
+        catch
+        {
+            // JSON değilse hiçbir şey yapma
+        }
     }
 
     private async Task AnalyzeApi()
@@ -164,7 +259,16 @@
 
         try
         {
-            var req = new { Method = method, Url = url };
+            var req = new
+            {
+                Method = method,
+                Url = url,
+                Body = (method == "POST" || method == "PUT") ? requestBody : null,
+                Headers = headers.Where(h => !string.IsNullOrWhiteSpace(h.Key))
+                                 .ToDictionary(h => h.Key, h => h.Value),
+                ContentType = contentType
+            };
+
             var res = await Http.PostAsJsonAsync("https://localhost:44319/api/Analyze", req);
 
             if (res.IsSuccessStatusCode)
@@ -270,6 +374,9 @@
         }
     }
 
+    // Tüm model generator metodları aynı kalıyor...
+    // (Önceki koddan kopyalayın: GenerateCSharpModel, GenerateJavaModel, vs.)
+
     private string GenerateCSharpModel(JsonElement root)
     {
         var sb = new System.Text.StringBuilder();
@@ -305,7 +412,6 @@
             var propName = ToPascalCase(property.Name);
             var csharpType = GetCSharpType(property.Value);
 
-           
             sb.AppendLine($"{indentStr}public {csharpType} {propName} {{ get; set; }}");
             sb.AppendLine();
         }
