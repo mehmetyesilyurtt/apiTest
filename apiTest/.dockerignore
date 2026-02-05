@@ -1,0 +1,9 @@
+**/.dockerignore
+**/.env
+**/bin/
+**/obj/
+**/out/
+**/.vscode/
+**/.vs/
+**/*.user
+**/appsettings.Development.json
